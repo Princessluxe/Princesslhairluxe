@@ -972,10 +972,29 @@ export default function Website() {
   const [page, setPage] = useState("home");
   const [activeCategory, setActiveCategory] = useState(null);
   const [search, setSearch] = useState("");
-  const [cart, setCart] = useState({ 12: 1, 16: 1, 24: 1 });
+  // Cart starts empty for every visitor. It's saved to this browser tab's
+  // sessionStorage as items are added, so it survives page reloads and
+  // navigating around the site, but clears automatically once the tab or
+  // browser is closed — it's never shared between different people.
+  const [cart, setCart] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem("phl_cart");
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
   const [toast, setToast] = useState("");
   const [products, setProducts] = useState(INITIAL_PRODUCTS);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem("phl_cart", JSON.stringify(cart));
+    } catch (e) {
+      // ignore write failures (e.g. private browsing quota)
+    }
+  }, [cart]);
 
   // Load the last saved catalog (shared across everyone using this site) on first load
   useEffect(() => {
