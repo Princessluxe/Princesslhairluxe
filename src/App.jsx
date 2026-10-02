@@ -1578,7 +1578,7 @@ export default function Website() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await window.storage.get("products", true);
+        const res = await window.storage.get("products_v2", true);
         if (res && res.value) {
           const parsed = JSON.parse(res.value);
           if (Array.isArray(parsed) && parsed.length) setProducts(parsed);
@@ -1771,7 +1771,7 @@ export default function Website() {
 
   const persistProducts = async (list) => {
     try {
-      await window.storage.set("products", JSON.stringify(list), true);
+      await window.storage.set("products_v2", JSON.stringify(list), true);
     } catch (e) {
       // silent — explicit Save Changes button will retry/report
     }
@@ -1809,7 +1809,7 @@ export default function Website() {
     setSaving(true);
     let result = null;
     try {
-      result = await window.storage.set("products", JSON.stringify(products), true);
+      result = await window.storage.set("products_v2", JSON.stringify(products), true);
     } catch (e) {
       result = null;
     }
