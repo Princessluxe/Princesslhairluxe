@@ -2,6 +2,18 @@
 
 This is a ready-to-deploy version of your site, built with Vite + React + Tailwind.
 
+## Project structure
+
+`src/App.jsx` holds all the site's logic (previously ~940KB because every
+product/category/brand photo was embedded as inline base64 text — that's
+been cleaned up). Images now live as real files under `src/assets/`, pulled
+in through `src/images.js`, which exports the same `PRODUCT_IMAGES`,
+`CATEGORY_IMAGES`, `BRAND_IMAGES`, `SOCIAL_ICONS` and `PAYMENT_CARD_IMAGE`
+objects as before — nothing about how the app uses them changed. This makes
+`App.jsx` small enough to open and edit directly on GitHub's website, and
+lets the browser cache images separately instead of re-downloading them
+every time the code changes.
+
 ## ⚠️ Read this first: the admin data limitation
 
 Inside Claude, the admin panel (products, orders, discount codes) used Claude's
@@ -105,3 +117,29 @@ https://YOUR-USERNAME.github.io/YOUR-REPO-NAME/
 
 If you want to add `princesshairluxe.com` back later, that's straightforward
 to re-enable — just ask.
+
+## AI sales assistant (chat widget) — setup
+
+The site has a floating chat assistant (bottom-right) built from your Princess Hair Luxe
+agent prompt. Two settings in `src/App.jsx` (the `AGENT_CONFIG` block) make it fully live:
+
+### 1. Order emails → princesshairluxe@gmail.com
+1. Create a free form at formspree.io with the destination `princesshairluxe@gmail.com`.
+2. Copy its endpoint URL (looks like `https://formspree.io/f/abcdwxyz`).
+3. Paste it into `emailEndpoint` in `AGENT_CONFIG`.
+
+Until this is set, chat orders are still saved and appear in the admin Orders tab with a
+red "Email not delivered" flag. The assistant tells the customer the order is being held
+for confirmation, never that it was forwarded.
+
+### 2. Chat connection (needed on the GitHub-hosted site)
+The Anthropic API needs a secret key, which must never be placed in website code.
+Use the small proxy in `agent-proxy/worker.js` (Cloudflare Workers, free tier):
+1. Create a Worker at dash.cloudflare.com and paste in `worker.js`.
+2. Add the secret `ANTHROPIC_API_KEY` and a text variable `ALLOWED_ORIGIN` = `https://YOUR-USERNAME.github.io`.
+3. Put the Worker's URL into `apiUrl` in `AGENT_CONFIG`.
+4. In the Anthropic console, set a monthly spend limit. The proxy checks the origin, caps
+   response size and forces the model, but it cannot fully stop someone deliberately
+   calling it, so a spend limit is your real protection.
+
+If the chat can't connect, it shows a WhatsApp link instead of failing silently.
